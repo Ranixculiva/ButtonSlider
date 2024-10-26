@@ -121,14 +121,16 @@
             }
         }
         if (self.textFormat.isUnderline) {
-            // Add underline path for this line
-            CGPathMoveToPoint(underLine, NULL, lineOrigin.x, lineOrigin.y + yOffsetForUnderline);
-            CGPathAddLineToPoint(underLine, NULL, lineOrigin.x + textWidth, lineOrigin.y + yOffsetForUnderline);
+            // Update underline path for this line
+            CGFloat lineStartX = rect.origin.x + xOffset;
+            CGFloat lineEndX = lineStartX + textWidth;
+            CGPathMoveToPoint(underLine, NULL, lineStartX, lineOrigin.y + yOffsetForUnderline);
+            CGPathAddLineToPoint(underLine, NULL, lineEndX, lineOrigin.y + yOffsetForUnderline);
         }
         if (self.textFormat.isStrikethrough) {
             // Add strikethrough path for this line
-            CGPathMoveToPoint(strikeLine, NULL, lineOrigin.x, lineCenter.y);
-            CGPathAddLineToPoint(strikeLine, NULL, lineOrigin.x + textWidth, lineCenter.y);
+            CGPathMoveToPoint(strikeLine, NULL, rect.origin.x + xOffset, lineCenter.y);
+            CGPathAddLineToPoint(strikeLine, NULL, rect.origin.x + xOffset + textWidth, lineCenter.y);
         }
     }
     
