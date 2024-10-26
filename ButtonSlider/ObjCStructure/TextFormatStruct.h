@@ -15,6 +15,7 @@ typedef struct {
     BOOL isUppercase;
     BOOL isLowercase;
     BOOL isProperCase;
+    CGFloat strikethroughLineThicknessFactor;
 } TextFormat;
 
 bool isEqual(TextFormat a, TextFormat b);

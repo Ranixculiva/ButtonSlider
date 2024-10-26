@@ -16,15 +16,29 @@ class AttributedTextViewModel: NSObject, ObservableObject, TextFormatControlPane
 
 struct AttributedTextView: View {
     @ObservedObject var viewModel: AttributedTextViewModel
+    let drawTextUtility = DrawTextUtility()
+    
+    init(viewModel: AttributedTextViewModel) {
+        self.viewModel = viewModel
+        drawTextUtility.textFormat.isUnderline = true
+        drawTextUtility.textFormat.isStrikethrough = true
+    }
     
     var body: some View {
+        Image(uiImage: drawTextUtility.createImage(withText: "Hello world fun fun fun go go go\nprobably", fontSize: 100))
+            .resizable()
+            .frame(width: 300, height: 300)
+            .background {
+                Color.green
+            }
         Text(attributedString)
             .padding()
             .foregroundColor(.white)
     }
     
     private var attributedString: AttributedString {
-        var textWithCase = viewModel.text
+        let thicknessFactor = String(format: "%.2f", viewModel.textFormat.strikethroughLineThicknessFactor)
+        var textWithCase = viewModel.text + "\nstrikethroughLineThicknessFactor: \(thicknessFactor)"
         if viewModel.textFormat.isUppercase {
             textWithCase = textWithCase.uppercased()
         } else if viewModel.textFormat.isLowercase {

@@ -12,6 +12,7 @@ struct TextFormatWrapper: Equatable {
     var isItalic: Bool = false
     var isUnderline: Bool = false
     var isStrikethrough: Bool = false
+    var strikethroughLineThicknessFactor: CGFloat = 0
     private enum TextCase {
         case uppercase, lowercase, properCase, none
     }
@@ -41,6 +42,7 @@ struct TextFormatWrapper: Equatable {
         self.isUppercase = textFormat.isUppercase.boolValue
         self.isLowercase = textFormat.isLowercase.boolValue
         self.isProperCase = textFormat.isProperCase.boolValue
+        self.strikethroughLineThicknessFactor = CGFloat(textFormat.strikethroughLineThicknessFactor)
     }
 
     private mutating func setTextCase(_ caseType: TextCase) {
@@ -55,7 +57,8 @@ struct TextFormatWrapper: Equatable {
             isStrikethrough: ObjCBool(isStrikethrough),
             isUppercase: ObjCBool(isUppercase),
             isLowercase: ObjCBool(isLowercase),
-            isProperCase: ObjCBool(isProperCase)
+            isProperCase: ObjCBool(isProperCase),
+            strikethroughLineThicknessFactor: CGFloat(strikethroughLineThicknessFactor)
         )
     }
 }
@@ -69,7 +72,7 @@ struct TextFormatWrapper: Equatable {
         notifyDelegate(textFormat: textFormat)
     }
 
-    private func notifyDelegate(textFormat: TextFormatWrapper, isUndoRedo: Bool = false) {
+    fileprivate func notifyDelegate(textFormat: TextFormatWrapper, isUndoRedo: Bool = false) {
         delegate?.onTextFormatChanged(textFormat.toObjCStruct(), isUndoRedo: isUndoRedo)
     }
     
@@ -132,17 +135,31 @@ struct TextFormatControlPanelView: View {
                             textFormat.isUnderline.toggle()
                         }
                     }
-                TextFormatControlButtonView(
-                    itemWidth: firstRowItemWidth,
-                    itemHeight: firstRowItemHeight,
-                    iconName: "btn_2lv_text_format_st",
-                    isSelected: viewModel.textFormat.isStrikethrough
-                )
+                if isDeveloperMode {
+                    ButtonSlider(
+                        isOn: $viewModel.textFormat.isStrikethrough,
+                        fillPercentage: $viewModel.textFormat.strikethroughLineThicknessFactor,
+                        iconName: "btn_2lv_text_format_st",
+                        threshold: 0.001,
+                        itemWidth: firstRowItemWidth,
+                        itemHeight: firstRowItemHeight) {
+                            viewModel.notifyDelegate(textFormat: viewModel.textFormat)
+                        } onDrag: { _ in
+                            viewModel.notifyDelegate(textFormat: viewModel.textFormat)
+                        }
+                } else {
+                    TextFormatControlButtonView(
+                        itemWidth: firstRowItemWidth,
+                        itemHeight: firstRowItemHeight,
+                        iconName: "btn_2lv_text_format_st",
+                        isSelected: viewModel.textFormat.isStrikethrough
+                    )
                     .onTapGesture {
                         viewModel.toggleProperty { textFormat in
                             textFormat.isStrikethrough.toggle()
                         }
                     }
+                }
             }
             
             // second row
@@ -223,9 +240,5 @@ struct TextFormatControlButtonView: View {
 }
 
 #Preview(body: {
-    TextFormatControlPanelView(viewModel: TextFormatControlPanelViewModel())
-        .background {
-            Color.black
-                .opacity(0.75)
-        }
+    ContentView()
 })

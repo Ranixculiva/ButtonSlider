@@ -25,16 +25,16 @@ struct ContentView: View {
         VStack {
             AttributedTextView(viewModel: attributedTextViewModel)
             TextFormatControlPanelView(viewModel: textFormatControlPanelViewModel)
-            ButtonSlider(isOn: $isOn, fillPercentage: $fillPercentage, iconName: "lightbulb.fill", threshold: 0.0)
-                .frame(width: 100, height: 50)
+//            ButtonSlider(isOn: $isOn, fillPercentage: $fillPercentage, iconName: "lightbulb.fill", threshold: 0.0)
+//                .frame(width: 100, height: 50)
         }
+        .background {
+                    Color.black
+                        .opacity(0.75)
+                }
     }
 }
 
 #Preview {
     ContentView()
-        .background {
-            Color.black
-                .opacity(0.75)
-        }
 }
