@@ -25,9 +25,9 @@ struct AttributedTextView: View {
     }
     
     var body: some View {
-        Image(uiImage: drawTextUtility.createImage(withText: "Hello world fun fun fun go go go\nprobably", fontSize: 100))
+        Image(uiImage: drawTextUtility.createImage(withText: "Hello world go go\nprobably", fontSize: 100))
             .resizable()
-            .frame(width: 300, height: 300)
+            .frame(width: 300, height: 500)
             .background {
                 Color.green
             }

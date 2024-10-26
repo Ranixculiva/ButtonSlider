@@ -11,8 +11,17 @@
 
 @implementation DrawTextUtility
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        self.letterSpacing = 30;
+    }
+    return self;
+}
+
 - (CGFloat)calculateLetterSpacingWithFontSize:(CGFloat)fontSize {
-    return 4;
+    return self.letterSpacing;
 }
 
 - (CGFloat)calculateStrikethroughLineThicknessWithFontSize:(CGFloat)fontSize {
@@ -25,11 +34,11 @@
 
 - (UIImage*)createImageWithText:(NSString*)text fontSize:(CGFloat)fontSize {
     // draw text to image
-    UIGraphicsBeginImageContextWithOptions(CGSizeMake(500, 500), NO, 0);
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(500, 700), NO, 0);
     CGContextRef context = UIGraphicsGetCurrentContext();
     NSDictionary* attributes = [self createAttributesWithFont:nil fontSize:fontSize fgColor:[UIColor blackColor] bgColor:[UIColor clearColor] paragraphStyle:nil];
     NSAttributedString* attributedText = [[NSAttributedString alloc] initWithString:text attributes:attributes];
-    [self drawAttributedTextWithContext:context attributedText:attributedText boldness:0 alignment:NSTextAlignmentCenter size:CGRectMake(0, 0, 500, 500) color:[UIColor blackColor] strokeColor:[UIColor clearColor] fontSize:fontSize];
+    [self drawAttributedTextWithContext:context attributedText:attributedText boldness:0 alignment:NSTextAlignmentRight size:CGRectMake(0, 0, 500, 700) color:[UIColor blackColor] strokeColor:[UIColor clearColor] fontSize:fontSize];
     UIImage* image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return image;
@@ -113,6 +122,14 @@
 
                 // Check if the glyph is a space
                 if (glyph != 0) {  // 0 is typically the glyph for space
+                    // get width of letter
+                    CGSize advance;
+                    CTFontGetAdvancesForGlyphs(runFont, kCTFontOrientationHorizontal, &glyph, &advance, 1);
+                    CGFloat letterWidth = advance.width;
+                    // draw a red rectangle under each letter to bound the letter
+                    CGContextSetFillColorWithColor(context, [UIColor redColor].CGColor);
+                    CGContextFillRect(context, CGRectMake(position.x + xOffset, position.y + lineOrigin.y, letterWidth, 10));
+
                     CGPathRef letter = CTFontCreatePathForGlyph(runFont, glyph, NULL);
                     CGAffineTransform t = CGAffineTransformMakeTranslation(position.x + xOffset, position.y + lineOrigin.y);
                     CGPathAddPath(letters, &t, letter);
