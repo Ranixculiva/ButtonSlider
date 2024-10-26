@@ -74,7 +74,13 @@
         // Calculate text width for alignment
         CGFloat ascent, descent, leading;
         CGFloat textWidth = CTLineGetTypographicBounds(line, &ascent, &descent, &leading);
-        if (i != lineCount - 1) {
+        
+        // Remove letter spacing for the last character if it's a newline
+        CFRange cfLineRange = CTLineGetStringRange(line);
+        NSRange lineRange = NSMakeRange(cfLineRange.location, cfLineRange.length);
+        unichar lastChar = [attributedText.string characterAtIndex:NSMaxRange(lineRange) - 1];
+        textWidth -= [self calculateLetterSpacingWithFontSize:fontSize];
+        if (lastChar == '\n') {
             textWidth -= [self calculateLetterSpacingWithFontSize:fontSize];
         }
         // Calculate the y position of the line (based on ascent and descent)
@@ -120,20 +126,27 @@
                 CTRunGetGlyphs(run, range, &glyph);
                 CTRunGetPositions(run, range, &position);
 
-                // Check if the glyph is a space
                 if (glyph != 0) {  // 0 is typically the glyph for space
-                    // get width of letter
-                    CGSize advance;
-                    CTFontGetAdvancesForGlyphs(runFont, kCTFontOrientationHorizontal, &glyph, &advance, 1);
-                    CGFloat letterWidth = advance.width;
-                    // draw a red rectangle under each letter to bound the letter
-                    CGContextSetFillColorWithColor(context, [UIColor redColor].CGColor);
-                    CGContextFillRect(context, CGRectMake(position.x + xOffset, position.y + lineOrigin.y, letterWidth, 10));
+//                    CGSize advance;
+//                    CTFontGetAdvancesForGlyphs(runFont, kCTFontOrientationHorizontal, &glyph, &advance, 1);
+//                    CGFloat letterWidth = advance.width;
 
-                    CGPathRef letter = CTFontCreatePathForGlyph(runFont, glyph, NULL);
-                    CGAffineTransform t = CGAffineTransformMakeTranslation(position.x + xOffset, position.y + lineOrigin.y);
-                    CGPathAddPath(letters, &t, letter);
-                    CGPathRelease(letter);
+                    // Apply xOffset to position.x
+                    CGFloat adjustedX = position.x + xOffset;
+
+                    // Skip drawing for newline characters
+                    unichar currentChar = [attributedText.string characterAtIndex:CTRunGetStringRange(run).location + k];
+                    if (currentChar != '\n') {
+                        // Draw the red rectangle (for debugging)
+//                        CGContextSetFillColorWithColor(context, [UIColor redColor].CGColor);
+//                        CGContextFillRect(context, CGRectMake(adjustedX, position.y + lineOrigin.y, letterWidth, 10));
+
+                        // Create and add the glyph path
+                        CGPathRef letter = CTFontCreatePathForGlyph(runFont, glyph, NULL);
+                        CGAffineTransform t = CGAffineTransformMakeTranslation(adjustedX, position.y + lineOrigin.y);
+                        CGPathAddPath(letters, &t, letter);
+                        CGPathRelease(letter);
+                    }
                 }
             }
         }
